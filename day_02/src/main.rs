@@ -49,7 +49,16 @@ impl Rule {
         let index_01 = self.min_char - 1;
         let index_02 = self.max_char - 1;
 
-        (password_chars[index_01] == self.required_char && password_chars[index_02] != self.required_char) || (password_chars[index_01] != self.required_char && password_chars[index_02] == self.required_char)
+        let char_01 = match password_chars.get(index_01) {
+            Some(c) => c,
+            None => return false
+        };
+        let char_02 = match password_chars.get(index_02) {
+            Some(c) => c,
+            None => return false
+        };
+
+        (char_01 == &self.required_char && char_02 != &self.required_char) || (char_01 != &self.required_char && char_02 == &self.required_char)
     }
 }
 
@@ -98,33 +107,7 @@ fn read_file(filename: &str) -> std::io::Result<Vec<Rule>> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn example_01() {
-        let rule1 = Rule { 
-            min_char: 1,
-            max_char: 3,
-            required_char: 'a',
-            password: "abcde".to_string()
-        };
-
-        let rule2 = Rule { 
-            min_char: 1,
-            max_char: 3,
-            required_char: 'b',
-            password: "cdefg".to_string()
-        };
-
-        let rule3 = Rule { 
-            min_char: 2,
-            max_char: 9,
-            required_char: 'c',
-            password: "ccccccccc".to_string()
-        };
-
-        let rules: Vec<Rule> = vec![rule1, rule2, rule3];
-        
-        assert_eq!(part_01(&rules), 2);
-    }
+    // Should add test too for parsing but meh
 
     #[test]
     fn examples() {
