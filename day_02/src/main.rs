@@ -107,34 +107,16 @@ fn read_file(filename: &str) -> std::io::Result<Vec<Rule>> {
 mod tests {
     use super::*;
 
-    // Should add test too for parsing but meh
-
     #[test]
-    fn examples() {
-        let rule1 = Rule { 
-            min_char: 1,
-            max_char: 3,
-            required_char: 'a',
-            password: "abcde".to_string()
-        };
-
-        let rule2 = Rule { 
-            min_char: 1,
-            max_char: 3,
-            required_char: 'b',
-            password: "cdefg".to_string()
-        };
-
-        let rule3 = Rule { 
-            min_char: 2,
-            max_char: 9,
-            required_char: 'c',
-            password: "ccccccccc".to_string()
-        };
-
-        let rules: Vec<Rule> = vec![rule1, rule2, rule3];
+    fn example_01() {
+        let rules = read_file("example.txt").unwrap();
         
         assert_eq!(part_01(&rules), 2);
+    }
+
+    #[test]
+    fn example_02() {
+        let rules = read_file("example.txt").unwrap();
 
         assert_eq!(part_02(&rules), 1);
     }
