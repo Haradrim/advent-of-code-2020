@@ -30,14 +30,13 @@ fn part_01(map: &Vec<Vec<char>>) -> u32 {
 
 fn part_02(map: &Vec<Vec<char>>) -> u32 {
     let slopes: Vec<(usize, usize)> = vec![(1,1), (3,1), (5,1), (7,1), (1,2)];
-
-    let mut results: Vec<u32> = Vec::new();
+    let mut result = 1;
 
     for slope in slopes.iter() {
-        results.push(traverse_map(map, *slope))
+        result *= traverse_map(map, *slope)
     }
 
-    results.iter().product()
+    result
 }
 
 fn traverse_map(map: &Vec<Vec<char>>, (right, down): (usize, usize)) -> u32 {
