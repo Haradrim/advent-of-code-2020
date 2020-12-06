@@ -9,17 +9,27 @@ const IYR_VALID_RANGE: RangeInclusive<usize> = 2010..=2020;
 const EYR_VALID_RANGE: RangeInclusive<usize> = 2020..=2030;
 const VALID_CM_HEIGHTS: RangeInclusive<usize> = 150..=193;
 const VALID_IN_HEIGHTS: RangeInclusive<usize> = 59..=76;
+const VALID_EYE_COLORS: &'static [&'static str] = &["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
+
+const CM: &str = "cm";
+const IN: &str = "in";
 
 fn main() -> Result<(), Box<dyn Error>>  {
     let passports = read_file("input.txt")?;
 
     println!("Answer 1: {:?}", part_01(&passports));
 
+    println!("Answer 2: {:?}", part_02(&passports));
+
     Ok(())
 }
 
 fn part_01 (passports: &Vec<Passport>) -> usize {
     passports.iter().count()
+}
+
+fn part_02 (passports: &Vec<Passport>) -> usize {
+    passports.iter().filter(|pass| pass.is_valid()).count()
 }
 
 #[derive(Debug)]
@@ -48,8 +58,55 @@ impl Display for PassportError {
 
 impl Passport {
     fn is_valid(&self) -> bool {
-        return true // TODO
+        [
+            is_number_valid(&self.birth_year, BYR_VALID_RANGE),
+            is_number_valid(&self.issue_year, IYR_VALID_RANGE),
+            is_number_valid(&self.expr_year, EYR_VALID_RANGE),
+            is_height_valid(&self.height),
+            is_hair_color_valid(&self.hair_color),
+            is_eye_color_valid(&self.eye_color),
+            is_pid_valid(&self.pass_id)
+        ]
+        .iter()
+        .all(|&x|  x)
     }
+}
+
+fn is_number_valid(number: &String, range: RangeInclusive<usize>) -> bool {
+    number.parse::<usize>().ok().map(|n| range.contains(&n)).unwrap_or(false)
+}
+
+fn is_height_valid(height: &String) -> bool {
+    match height.strip_suffix(CM) {
+        Some(rest) => {
+            return rest.parse::<usize>().ok()
+                .map(|h| VALID_CM_HEIGHTS.contains(&h))
+                .unwrap_or(false)
+        }
+        None => match height.strip_suffix(IN) {
+            Some(rest) => {
+                return rest.parse::<usize>().ok()
+                    .map(|h| VALID_IN_HEIGHTS.contains(&h))
+                    .unwrap_or(false);
+            }
+            None => false
+        }
+    }
+}
+
+fn is_hair_color_valid(hair_color: &String) -> bool {
+    match hair_color.strip_prefix('#') {
+        Some(rest) => u32::from_str_radix(rest, 16).is_ok(),
+        None => false
+    }
+}
+
+fn is_eye_color_valid(eye_color: &String) -> bool {
+    VALID_EYE_COLORS.contains(&eye_color.as_str())
+}
+
+fn is_pid_valid(passport_id: &String) -> bool {
+    passport_id.matches(char::is_numeric).count() == 9
 }
 
 impl FromStr for Passport {
@@ -102,5 +159,12 @@ mod tests {
         let passports = read_file("example.txt").unwrap();
         
         assert_eq!(part_01(&passports), 2);
+    }
+
+    #[test]
+    fn example_02() {
+        let passports = read_file("example_02.txt").unwrap();
+        
+        assert_eq!(part_02(&passports), 4);
     }
 }
