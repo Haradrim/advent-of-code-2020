@@ -3,6 +3,7 @@ use std::{error::Error, str::FromStr};
 use std::fs;
 use std::fmt::{Display};
 use std::ops::RangeInclusive;
+use std::time::Instant;
 
 const BYR_VALID_RANGE: RangeInclusive<usize> = 1920..=2002;
 const IYR_VALID_RANGE: RangeInclusive<usize> = 2010..=2020;
@@ -11,15 +12,18 @@ const VALID_CM_HEIGHTS: RangeInclusive<usize> = 150..=193;
 const VALID_IN_HEIGHTS: RangeInclusive<usize> = 59..=76;
 const VALID_EYE_COLORS: &'static [&'static str] = &["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
 
-const CM: &str = "cm";
-const IN: &str = "in";
-
 fn main() -> Result<(), Box<dyn Error>>  {
     let passports = read_file("input.txt")?;
 
+    let start = Instant::now();
+
     println!("Answer 1: {:?}", part_01(&passports));
+    println!("Completed in {:?}", start.elapsed());
+
+    let start = Instant::now();
 
     println!("Answer 2: {:?}", part_02(&passports));
+    println!("Completed in {:?}", start.elapsed());
 
     Ok(())
 }
@@ -77,13 +81,13 @@ fn is_number_valid(number: &String, range: RangeInclusive<usize>) -> bool {
 }
 
 fn is_height_valid(height: &String) -> bool {
-    match height.strip_suffix(CM) {
+    match height.strip_suffix("cm") {
         Some(rest) => {
             return rest.parse::<usize>().ok()
                 .map(|h| VALID_CM_HEIGHTS.contains(&h))
                 .unwrap_or(false)
         }
-        None => match height.strip_suffix(IN) {
+        None => match height.strip_suffix("in") {
             Some(rest) => {
                 return rest.parse::<usize>().ok()
                     .map(|h| VALID_IN_HEIGHTS.contains(&h))
@@ -139,12 +143,12 @@ impl FromStr for Passport {
 }
 
 fn read_file(filename: &str) -> std::io::Result<Vec<Passport>> {
-    let input = fs::read_to_string(filename).unwrap();
+    let input = fs::read_to_string(filename)?;
 
     Ok(
         input
-            .split("\r\n\r\n")
-            .map(|id| id.to_string().replace("\r\n", " "))
+            .split("\n\n") // \r\n\r\n on Windows
+            .map(|id| id.to_string().replace("\n", " ")) // \r\n on Windows
             .filter_map(|id| id.parse().ok())
             .collect()
     )
