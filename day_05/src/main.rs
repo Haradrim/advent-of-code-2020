@@ -17,33 +17,24 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn part_01(passes: &Vec<String>) -> u16 {
-    passes
-            .iter()
-            .map(|x| calculate_seat(x))
-            .max()
-            .unwrap()
+    passes.iter().map(|x| calculate_seat(x)).max().unwrap()
 }
 
 fn part_02(passes: &Vec<String>) -> u16 {
-    let mut seats:Vec<u16> = passes
-            .iter()
-            .map(|x| calculate_seat(x))
-            .collect();
-            
+    let mut seats: Vec<u16> = passes.iter().map(|x| calculate_seat(x)).collect();
+
     seats.sort_unstable();
 
     let result = (seats[0]..=seats[seats.len() - 1])
-        .zip(seats
-        .iter())
+        .zip(seats.iter())
         .find(|(expected, seat)| expected != *seat)
         .unwrap();
-    
+
     result.0
 }
 
-fn calculate_seat (boarding_pass: &String) -> u16
-{
-    boarding_pass.chars().fold(0,  |acc, character| {
+fn calculate_seat(boarding_pass: &String) -> u16 {
+    boarding_pass.chars().fold(0, |acc, character| {
         (acc << 1) | matches!(character, 'B' | 'R') as u16
     })
 }
@@ -51,12 +42,7 @@ fn calculate_seat (boarding_pass: &String) -> u16
 fn read_file(filename: &str) -> std::io::Result<Vec<String>> {
     let input = fs::read_to_string(filename)?;
 
-    Ok(
-        input
-            .lines()
-            .map(|line| line.to_string())
-            .collect()
-    )
+    Ok(input.lines().map(|line| line.to_string()).collect())
 }
 
 #[cfg(test)]

@@ -29,7 +29,7 @@ fn part_01(map: &Vec<Vec<char>>) -> u32 {
 }
 
 fn part_02(map: &Vec<Vec<char>>) -> u32 {
-    let slopes: Vec<(usize, usize)> = vec![(1,1), (3,1), (5,1), (7,1), (1,2)];
+    let slopes: Vec<(usize, usize)> = vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)];
     let mut result = 1;
 
     for slope in slopes.iter() {
@@ -62,13 +62,11 @@ fn read_file(filename: &str) -> std::io::Result<Vec<Vec<char>>> {
     let input = File::open(filename)?;
     let reader = BufReader::new(input);
 
-    Ok(
-        reader
-            .lines()
-            .filter_map(|line| line.ok().and_then(|line| line.parse::<String>().ok()))
-            .map(|map_line| map_line.chars().collect())
-            .collect()
-    )
+    Ok(reader
+        .lines()
+        .filter_map(|line| line.ok().and_then(|line| line.parse::<String>().ok()))
+        .map(|map_line| map_line.chars().collect())
+        .collect())
 }
 
 #[cfg(test)]
@@ -77,14 +75,14 @@ mod tests {
 
     #[test]
     fn example_01() {
-        let map = read_file("example.txt").unwrap();  
+        let map = read_file("example.txt").unwrap();
 
         assert_eq!(part_01(&map), 7);
     }
 
     #[test]
     fn example_02() {
-        let map = read_file("example.txt").unwrap();  
+        let map = read_file("example.txt").unwrap();
 
         assert_eq!(part_02(&map), 336);
     }

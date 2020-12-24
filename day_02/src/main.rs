@@ -1,15 +1,15 @@
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::str::FromStr;
 use std::num::ParseIntError;
+use std::str::FromStr;
 use std::time::Instant;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let rules = read_file("input.txt")?;
 
     let start = Instant::now();
-    
+
     println!("Answer 1: {:?}", part_01(&rules));
     println!("Completed in {:?}", start.elapsed());
 
@@ -21,25 +21,29 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn part_01 (rules: &Vec<Rule>) -> usize {
+fn part_01(rules: &Vec<Rule>) -> usize {
     rules.iter().filter(|rule| rule.is_valid_01()).count()
 }
 
-fn part_02 (rules: &Vec<Rule>) -> usize {
+fn part_02(rules: &Vec<Rule>) -> usize {
     rules.iter().filter(|rule| rule.is_valid_02()).count()
-} 
+}
 
 #[derive(Debug)]
 struct Rule {
     min_char: usize,
     max_char: usize,
     required_char: char,
-    password: String
+    password: String,
 }
 
 impl Rule {
     fn is_valid_01(&self) -> bool {
-        let required_char_count = self.password.chars().filter(|&c| c == self.required_char).count();
+        let required_char_count = self
+            .password
+            .chars()
+            .filter(|&c| c == self.required_char)
+            .count();
 
         required_char_count >= self.min_char && required_char_count <= self.max_char
     }
@@ -51,14 +55,15 @@ impl Rule {
 
         let char_01 = match password_chars.get(index_01) {
             Some(c) => c,
-            None => return false
+            None => return false,
         };
         let char_02 = match password_chars.get(index_02) {
             Some(c) => c,
-            None => return false
+            None => return false,
         };
 
-        (char_01 == &self.required_char && char_02 != &self.required_char) || (char_01 != &self.required_char && char_02 == &self.required_char)
+        (char_01 == &self.required_char && char_02 != &self.required_char)
+            || (char_01 != &self.required_char && char_02 == &self.required_char)
     }
 }
 
@@ -77,16 +82,15 @@ impl FromStr for Rule {
 
         let sub_strings: Vec<&str> = bounds.trim().split('-').collect();
         let (min, max) = (sub_strings[0], sub_strings[1]);
-         
+
         let min_char: usize = min.parse()?;
         let max_char: usize = max.parse()?;
-        
 
         Ok(Rule {
             min_char,
             max_char,
             required_char,
-            password
+            password,
         })
     }
 }
@@ -95,12 +99,10 @@ fn read_file(filename: &str) -> std::io::Result<Vec<Rule>> {
     let input = File::open(filename)?;
     let reader = BufReader::new(input);
 
-    Ok(
-        reader
-            .lines()
-            .filter_map(|line| line.ok().and_then(|line| line.parse().ok()))
-            .collect()
-    )
+    Ok(reader
+        .lines()
+        .filter_map(|line| line.ok().and_then(|line| line.parse().ok()))
+        .collect())
 }
 
 #[cfg(test)]
@@ -110,7 +112,7 @@ mod tests {
     #[test]
     fn example_01() {
         let rules = read_file("example.txt").unwrap();
-        
+
         assert_eq!(part_01(&rules), 2);
     }
 

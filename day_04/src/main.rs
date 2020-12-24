@@ -1,18 +1,19 @@
-use std::{collections::HashMap};
-use std::{error::Error, str::FromStr};
+use std::collections::HashMap;
+use std::fmt::Display;
 use std::fs;
-use std::fmt::{Display};
 use std::ops::RangeInclusive;
 use std::time::Instant;
+use std::{error::Error, str::FromStr};
 
 const BYR_VALID_RANGE: RangeInclusive<usize> = 1920..=2002;
 const IYR_VALID_RANGE: RangeInclusive<usize> = 2010..=2020;
 const EYR_VALID_RANGE: RangeInclusive<usize> = 2020..=2030;
 const VALID_CM_HEIGHTS: RangeInclusive<usize> = 150..=193;
 const VALID_IN_HEIGHTS: RangeInclusive<usize> = 59..=76;
-const VALID_EYE_COLORS: &'static [&'static str] = &["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
+const VALID_EYE_COLORS: &'static [&'static str] =
+    &["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
 
-fn main() -> Result<(), Box<dyn Error>>  {
+fn main() -> Result<(), Box<dyn Error>> {
     let passports = read_file("input.txt")?;
 
     let start = Instant::now();
@@ -28,11 +29,11 @@ fn main() -> Result<(), Box<dyn Error>>  {
     Ok(())
 }
 
-fn part_01 (passports: &Vec<Passport>) -> usize {
+fn part_01(passports: &Vec<Passport>) -> usize {
     passports.iter().count()
 }
 
-fn part_02 (passports: &Vec<Passport>) -> usize {
+fn part_02(passports: &Vec<Passport>) -> usize {
     passports.iter().filter(|pass| pass.is_valid()).count()
 }
 
@@ -45,17 +46,17 @@ struct Passport {
     hair_color: String,
     eye_color: String,
     pass_id: String,
-    country_id: Option<String>
+    country_id: Option<String>,
 }
 
 enum PassportError {
-    MissingField
+    MissingField,
 }
 
 impl Display for PassportError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
-            PassportError::MissingField => f.write_str("Missing field")
+            PassportError::MissingField => f.write_str("Missing field"),
         }
     }
 }
@@ -69,39 +70,47 @@ impl Passport {
             is_height_valid(&self.height),
             is_hair_color_valid(&self.hair_color),
             is_eye_color_valid(&self.eye_color),
-            is_pid_valid(&self.pass_id)
+            is_pid_valid(&self.pass_id),
         ]
         .iter()
-        .all(|&x|  x)
+        .all(|&x| x)
     }
 }
 
 fn is_number_valid(number: &String, range: RangeInclusive<usize>) -> bool {
-    number.parse::<usize>().ok().map(|n| range.contains(&n)).unwrap_or(false)
+    number
+        .parse::<usize>()
+        .ok()
+        .map(|n| range.contains(&n))
+        .unwrap_or(false)
 }
 
 fn is_height_valid(height: &String) -> bool {
     match height.strip_suffix("cm") {
         Some(rest) => {
-            return rest.parse::<usize>().ok()
+            return rest
+                .parse::<usize>()
+                .ok()
                 .map(|h| VALID_CM_HEIGHTS.contains(&h))
                 .unwrap_or(false)
         }
         None => match height.strip_suffix("in") {
             Some(rest) => {
-                return rest.parse::<usize>().ok()
+                return rest
+                    .parse::<usize>()
+                    .ok()
                     .map(|h| VALID_IN_HEIGHTS.contains(&h))
                     .unwrap_or(false);
             }
-            None => false
-        }
+            None => false,
+        },
     }
 }
 
 fn is_hair_color_valid(hair_color: &String) -> bool {
     match hair_color.strip_prefix('#') {
         Some(rest) => u32::from_str_radix(rest, 16).is_ok(),
-        None => false
+        None => false,
     }
 }
 
@@ -125,16 +134,37 @@ impl FromStr for Passport {
         }
 
         Ok(Passport {
-            birth_year: mapping.get("byr").ok_or(PassportError::MissingField)?.to_string(),
-            issue_year: mapping.get("iyr").ok_or(PassportError::MissingField)?.to_string(),
-            expr_year: mapping.get("eyr").ok_or(PassportError::MissingField)?.to_string(),
-            height: mapping.get("hgt").ok_or(PassportError::MissingField)?.to_string(),
-            hair_color: mapping.get("hcl").ok_or(PassportError::MissingField)?.to_string(),
-            eye_color: mapping.get("ecl").ok_or(PassportError::MissingField)?.to_string(),
-            pass_id: mapping.get("pid").ok_or(PassportError::MissingField)?.to_string(),
+            birth_year: mapping
+                .get("byr")
+                .ok_or(PassportError::MissingField)?
+                .to_string(),
+            issue_year: mapping
+                .get("iyr")
+                .ok_or(PassportError::MissingField)?
+                .to_string(),
+            expr_year: mapping
+                .get("eyr")
+                .ok_or(PassportError::MissingField)?
+                .to_string(),
+            height: mapping
+                .get("hgt")
+                .ok_or(PassportError::MissingField)?
+                .to_string(),
+            hair_color: mapping
+                .get("hcl")
+                .ok_or(PassportError::MissingField)?
+                .to_string(),
+            eye_color: mapping
+                .get("ecl")
+                .ok_or(PassportError::MissingField)?
+                .to_string(),
+            pass_id: mapping
+                .get("pid")
+                .ok_or(PassportError::MissingField)?
+                .to_string(),
             country_id: match mapping.get("cid") {
                 Some(s) => Some(s.to_string()),
-                None => None 
+                None => None,
             },
         })
     }
@@ -145,13 +175,11 @@ impl FromStr for Passport {
 fn read_file(filename: &str) -> std::io::Result<Vec<Passport>> {
     let input = fs::read_to_string(filename)?;
 
-    Ok(
-        input
-            .split("\n\n") // \r\n\r\n on Windows
-            .map(|id| id.to_string().replace("\n", " ")) // \r\n on Windows
-            .filter_map(|id| id.parse().ok())
-            .collect()
-    )
+    Ok(input
+        .split("\n\n") // \r\n\r\n on Windows
+        .map(|id| id.to_string().replace("\n", " ")) // \r\n on Windows
+        .filter_map(|id| id.parse().ok())
+        .collect())
 }
 
 #[cfg(test)]
@@ -161,14 +189,14 @@ mod tests {
     #[test]
     fn example_01() {
         let passports = read_file("example.txt").unwrap();
-        
+
         assert_eq!(part_01(&passports), 2);
     }
 
     #[test]
     fn example_02() {
         let passports = read_file("example_02.txt").unwrap();
-        
+
         assert_eq!(part_02(&passports), 4);
     }
 }
