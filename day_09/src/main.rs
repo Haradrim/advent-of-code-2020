@@ -13,7 +13,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn part_01(numbers: &Vec<u64>, preamble: usize) -> u64 {
+fn part_01(numbers: &Vec<u64>, preamble: usize) -> Option<u64> {
     for (index, number) in numbers.iter().enumerate().skip(preamble) {
         let mut preamble: Vec<u64> = numbers[(index - preamble)..index].iter().copied().collect();
 
@@ -22,11 +22,11 @@ fn part_01(numbers: &Vec<u64>, preamble: usize) -> u64 {
         let is_valid = number_is_valid(&number, &preamble);
 
         if !is_valid {
-            return *number;
+            return Some(*number);
         }
     }
 
-    panic!("No number found.")
+    None
 }
 
 fn number_is_valid(number: &u64, preamble: &Vec<u64>) -> bool {
@@ -57,6 +57,6 @@ mod tests {
     fn example_01() {
         let numbers = read_file("example.txt").unwrap();
 
-        assert_eq!(part_01(&numbers, 5), 127);
+        assert_eq!(part_01(&numbers, 5), Some(127));
     }
 }
