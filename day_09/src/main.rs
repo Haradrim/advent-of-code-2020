@@ -2,12 +2,20 @@ use std::{cmp::Ordering, error::Error, fs, time::Instant};
 
 const PREAMBLE: usize = 25;
 
+// TODO: solutions can probably be more optimized, they are a bit slow.
 fn main() -> Result<(), Box<dyn Error>> {
     let numbers = read_file("input.txt")?;
 
     let start = Instant::now();
 
-    println!("Answer 1: {:?}", part_01(&numbers, PREAMBLE));
+    let invalid_number = part_01(&numbers, PREAMBLE);
+
+    println!("Answer 1: {:?}", invalid_number);
+    println!("Completed in {:?}", start.elapsed());
+
+    let start = Instant::now();
+
+    println!("Answer 2: {:?}", part_02(&numbers, invalid_number.unwrap()));
     println!("Completed in {:?}", start.elapsed());
 
     Ok(())
@@ -23,6 +31,31 @@ fn part_01(numbers: &Vec<u64>, preamble: usize) -> Option<u64> {
 
         if !is_valid {
             return Some(*number);
+        }
+    }
+
+    None
+}
+
+fn part_02(numbers: &Vec<u64>, invalid_number: u64) -> Option<u64> {
+    for (index, _) in numbers.iter().enumerate() {
+        let range: Vec<u64> = numbers[index..].iter().copied().collect();
+        let mut accumulator = 0;
+
+        for (index, number) in range.iter().enumerate() {
+            accumulator += number;
+
+            match (accumulator).cmp(&invalid_number) {
+                Ordering::Equal => {
+                    let mut range: Vec<u64> = range[..=index].iter().copied().collect();
+
+                    range.sort();
+
+                    return Some(range[0] + range[range.len() - 1]);
+                }
+                Ordering::Greater => break,
+                Ordering::Less => continue,
+            }
         }
     }
 
@@ -58,5 +91,12 @@ mod tests {
         let numbers = read_file("example.txt").unwrap();
 
         assert_eq!(part_01(&numbers, 5), Some(127));
+    }
+
+    #[test]
+    fn example_02() {
+        let numbers = read_file("example.txt").unwrap();
+
+        assert_eq!(part_02(&numbers, 127), Some(62));
     }
 }
